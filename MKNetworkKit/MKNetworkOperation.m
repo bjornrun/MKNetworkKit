@@ -132,6 +132,8 @@
 @synthesize cacheHeaders = _cacheHeaders;
 @synthesize error = _error;
 
+@synthesize doEncrypt = _doEncrypt;
+@synthesize encryptionKey = _encryptionKey;
 
 // A RESTful service should always return the same response for a given URL and it's parameters.
 // this means if these values are correct, you can cache the responses
@@ -542,6 +544,8 @@
 {	
   if((self = [super init])) {
     
+      self.doEncrypt = FALSE;
+      
     self.responseBlocks = [NSMutableArray array];
     self.errorBlocks = [NSMutableArray array];        
     
@@ -1111,10 +1115,19 @@
   if([self.downloadStreams count] == 0)
     [self.mutableData appendData:data];
   
+    int doOnce = 1;
   for(NSOutputStream *stream in self.downloadStreams) {
     
     if ([stream hasSpaceAvailable]) {
-      const uint8_t *dataBuffer = [data bytes];
+      /*const*/ uint8_t *dataBuffer = [data bytes];
+        if (_doEncrypt && doOnce) {
+            doOnce = 0;
+            for (int i = 0; i < [data length]; i++) {
+				dataBuffer[i] ^= _encryptionKey;
+				_encryptionKey = (_encryptionKey + 1) | (_encryptionKey ^ 0x78);
+			}
+
+        }
       [stream write:&dataBuffer[0] maxLength:[data length]];
     }        
   }

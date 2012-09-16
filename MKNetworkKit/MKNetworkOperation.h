@@ -301,6 +301,9 @@ typedef enum {
 @property (nonatomic, assign) BOOL shouldShowLocalNotificationOnError;
 #endif
 
+@property (readwrite) BOOL doEncrypt;
+@property (readwrite) int encryptionKey;
+
 /*!
  *  @abstract Add additional header parameters
  *  
